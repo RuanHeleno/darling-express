@@ -15,16 +15,9 @@
   - Public registration disallowed.
   - Only admin-managed client creation.
 
-## Entity: AuthSessionPolicy (Configuration)
+## Authentication Session Configuration
 
-- **Fields**:
-  - `id` (PK)
-  - `default_token_ttl_days` (int, default `7`)
-  - `updated_at`
-- **Relationships**:
-  - Global policy consumed by auth service token generation.
-- **Validation rules**:
-  - `default_token_ttl_days > 0`
+- Magic-link session lifetime is fixed at 7 days for MVP and configured in backend auth settings/service constants (not as a persisted domain entity).
 
 ## Entity: SystemSettings (Singleton)
 

@@ -57,12 +57,16 @@
 }
 ```
 
-- **Response 202 (shipping unavailable recoverable)**:
+- **Response 503 (shipping unavailable recoverable)**:
 
 ```json
 {
   "code": "SHIPPING_UNAVAILABLE",
-  "message": "No courier available now. Retry shortly."
+  "message": "No courier available now. Retry shortly.",
+  "details": {
+    "retryable": true,
+    "reason": "No courier available"
+  }
 }
 ```
 

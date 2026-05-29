@@ -51,14 +51,11 @@ specs/001-esmalteria-express-mvp/
 
 ```text
 backend/
-├── apps/
-│   ├── auth/
-│   ├── catalog/
-│   ├── orders/
-│   ├── payments/
-│   └── logistics/
-├── services/
-├── api/
+├── users/
+├── core/
+├── catalog/
+├── orders/
+├── config/
 └── tests/
     ├── unit/
     ├── integration/

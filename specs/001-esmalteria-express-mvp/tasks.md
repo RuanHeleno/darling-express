@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/001-esmalteria-express-mvp/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
-**Tests**: Tests are not explicitly requested in the specification; this task list focuses on implementation and validation tasks.
+**Tests**: Automated tests are required by the specification's mandatory testing scenarios and plan quality gates; this task list includes explicit contract, concurrency, and idempotency coverage.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -131,6 +131,9 @@
 - [ ] T055 Validate TypeScript strictness and Python typing across `mobile/src/` and `backend/`
 - [ ] T056 Perform final pass on logging and error envelope consistency in `backend/orders/services/*.py` and `backend/users/services/*.py`
 - [ ] T057 Validate endpoint-level error contracts for `quote-shipping`, `pay`, `webhooks/infinitepay`, and `dispatch` against `specs/001-esmalteria-express-mvp/contracts/api-contract.md`
+- [ ] T058 Add API contract tests for `quote-shipping`, `pay`, `webhooks/infinitepay`, and `dispatch` in `backend/tests/contract/`
+- [ ] T059 Add concurrency/idempotency integration tests for duplicate webhook and final-unit race scenarios in `backend/tests/integration/`
+- [ ] T060 Add mobile integration test for delayed-webhook reconciliation on app reopen in `mobile/tests/integration/`
 
 ---
 
