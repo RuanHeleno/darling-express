@@ -1,0 +1,164 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: darling-express-postgres
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/POSTGRES_DB
+      POSTGRES_USER_FILE: /run/secrets/POSTGRES_USER
+      POSTGRES_PASSWORD_FILE: /run/secrets/POSTGRES_PASSWORD
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    secrets:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$(cat /run/secrets/POSTGRES_USER) -d $$(cat /run/secrets/POSTGRES_DB)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: darling-express-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: darling-express-api
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CORS_ALLOWED_ORIGINS: ${DJANGO_CORS_ALLOWED_ORIGINS:-http://localhost:8081,http://localhost:19006}
+    volumes:
+      - ./backend:/app
+    secrets:
+      - DJANGO_SECRET_KEY
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - INFINITEPAY_API_KEY
+      - INFINITEPAY_WEBHOOK_SECRET
+      - LALAMOVE_API_KEY
+      - LALAMOVE_BASE_URL
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: darling-express-celery-worker
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CORS_ALLOWED_ORIGINS: ${DJANGO_CORS_ALLOWED_ORIGINS:-http://localhost:8081,http://localhost:19006}
+    volumes:
+      - ./backend:/app
+    secrets:
+      - DJANGO_SECRET_KEY
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - INFINITEPAY_API_KEY
+      - INFINITEPAY_WEBHOOK_SECRET
+      - LALAMOVE_API_KEY
+      - LALAMOVE_BASE_URL
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config worker -l info
+
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: darling-express-celery-beat
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CORS_ALLOWED_ORIGINS: ${DJANGO_CORS_ALLOWED_ORIGINS:-http://localhost:8081,http://localhost:19006}
+    volumes:
+      - ./backend:/app
+    secrets:
+      - DJANGO_SECRET_KEY
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - INFINITEPAY_API_KEY
+      - INFINITEPAY_WEBHOOK_SECRET
+      - LALAMOVE_API_KEY
+      - LALAMOVE_BASE_URL
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config beat -l info
+
+  mobile:
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+    container_name: darling-express-mobile
+    environment:
+      EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-http://localhost:8000}
+    volumes:
+      - ./mobile:/app
+      - mobile_node_modules:/app/node_modules
+    ports:
+      - "8081:8081"
+    depends_on:
+      api:
+        condition: service_started
+    command: sh -c "yarn start -- --tunnel"
+
+secrets:
+  DJANGO_SECRET_KEY:
+    file: ./.secrets/DJANGO_SECRET_KEY
+  POSTGRES_DB:
+    file: ./.secrets/POSTGRES_DB
+  POSTGRES_USER:
+    file: ./.secrets/POSTGRES_USER
+  POSTGRES_PASSWORD:
+    file: ./.secrets/POSTGRES_PASSWORD
+  INFINITEPAY_API_KEY:
+    file: ./.secrets/INFINITEPAY_API_KEY
+  INFINITEPAY_WEBHOOK_SECRET:
+    file: ./.secrets/INFINITEPAY_WEBHOOK_SECRET
+  LALAMOVE_API_KEY:
+    file: ./.secrets/LALAMOVE_API_KEY
+  LALAMOVE_BASE_URL:
+    file: ./.secrets/LALAMOVE_BASE_URL
+
+volumes:
+  postgres_data:
+  redis_data:
+  mobile_node_modules:

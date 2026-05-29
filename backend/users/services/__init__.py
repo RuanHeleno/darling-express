@@ -1,0 +1,1 @@
+from .auth_service import issue_magic_link

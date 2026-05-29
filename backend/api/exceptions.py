@@ -1,0 +1,1 @@
+"""Custom API exceptions for darling-express backend."""

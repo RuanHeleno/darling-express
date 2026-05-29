@@ -1,0 +1,1 @@
+"""User serializers will be added during the authentication implementation phase."""

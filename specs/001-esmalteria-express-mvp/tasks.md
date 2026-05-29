@@ -14,14 +14,14 @@
 
 **Purpose**: Initialize runtime and project skeletons.
 
-- [ ] T001 Create Docker orchestration in `docker-compose.yml` with `postgres`, `redis`, `api`, `celery_worker`, `celery_beat`, and `mobile`
-- [ ] T002 [P] Create backend container build in `backend/Dockerfile`
-- [ ] T003 [P] Create mobile container build in `mobile/Dockerfile`
-- [ ] T004 Create environment template in `.env.example` including DB, Redis, InfinitePay, Lalamove, and webhook signature variables
-- [ ] T005 Scaffold Django project entrypoints in `backend/manage.py`, `backend/config/asgi.py`, and `backend/config/urls.py`
-- [ ] T006 [P] Scaffold backend apps in `backend/users/`, `backend/core/`, `backend/catalog/`, and `backend/orders/`
-- [ ] T007 Scaffold Expo project shell in `mobile/package.json`, `mobile/app.json`, and `mobile/src/App.tsx`
-- [ ] T008 [P] Configure strict TypeScript in `mobile/tsconfig.json`
+- [x] T001 Create Docker orchestration in `docker-compose.yml` with `postgres`, `redis`, `api`, `celery_worker`, `celery_beat`, and `mobile`
+- [x] T002 [P] Create backend container build in `backend/Dockerfile`
+- [x] T003 [P] Create mobile container build in `mobile/Dockerfile`
+- [x] T004 Create environment template in `.env.example` including DB, Redis, InfinitePay, Lalamove, and webhook signature variables
+- [x] T005 Scaffold Django project entrypoints in `backend/manage.py`, `backend/config/asgi.py`, and `backend/config/urls.py`
+- [x] T006 [P] Scaffold backend apps in `backend/users/`, `backend/core/`, `backend/catalog/`, and `backend/orders/`
+- [x] T007 Scaffold Expo project shell in `mobile/package.json`, `mobile/app.json`, and `mobile/src/App.tsx`
+- [x] T008 [P] Configure strict TypeScript in `mobile/tsconfig.json`
 
 ---
 
@@ -31,8 +31,8 @@
 
 **⚠️ CRITICAL**: No story implementation starts before this phase completes.
 
-- [ ] T009 Configure backend dependencies and settings in `backend/pyproject.toml` (or `backend/requirements.txt`) and `backend/config/settings/*.py`
-- [ ] T010 Configure mobile dependencies in `mobile/package.json` for React Navigation, Zustand, React Query, and NativeWind
+- [x] T009 Configure backend dependencies and settings in `backend/pyproject.toml` (or `backend/requirements.txt`) and `backend/config/settings/*.py`
+- [x] T010 Configure mobile dependencies in `mobile/package.json` for React Navigation, Zustand, React Query, and NativeWind
 - [ ] T011 Implement `CustomUser` model and admin registration in `backend/users/models.py` and `backend/users/admin.py`
 - [ ] T012 Implement `SystemSettings` singleton in `backend/core/models.py` and `backend/core/admin.py`
 - [ ] T013 [P] Implement `Category` and `Product` models in `backend/catalog/models.py`

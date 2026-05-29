@@ -1,0 +1,1 @@
+"""Catalog serializers will be added during the catalog implementation phase."""

@@ -1,0 +1,1 @@
+from .catalog_service import list_catalog_products

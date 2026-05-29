@@ -4,13 +4,14 @@
 
 - Docker + Docker Compose
 - Python 3.11 toolchain (for local commands outside containers)
-- Node.js LTS (for Expo local workflows)
+- Node.js LTS + Yarn Classic (for Expo local workflows)
 
 ## 2. Environment
 
 1. Copy `.env.example` to `.env`.
-2. Fill DB, Redis, InfinitePay, and Lalamove credentials.
-3. Ensure webhook secret key is configured.
+2. Keep `.env` for non-secret runtime knobs and frontend public vars only.
+3. Create secret files under `.secrets/` following `.secrets/.example`.
+4. Ensure Docker secret files are populated before `docker compose up`.
 
 ## 3. Boot the stack
 
@@ -25,9 +26,10 @@
 
 ## 5. Mobile setup
 
-1. Start Expo app.
-2. Validate deep-link config for `esmalteria://auth?token=...`.
-3. Confirm root RBAC navigator splits admin/client routes.
+1. Install dependencies with `yarn install`.
+2. Start Expo app with `yarn start`.
+3. Validate deep-link config for `esmalteria://auth?token=...`.
+4. Confirm root RBAC navigator splits admin/client routes.
 
 ## 6. Validation checklist
 

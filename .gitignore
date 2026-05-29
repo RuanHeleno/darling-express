@@ -1,1 +1,64 @@
+# Editors / IDE
 .vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.out
+*.err
+
+# Env files (keep examples tracked)
+.env
+.env.*
+!.env.example
+
+# Docker secrets directory (keep templates tracked)
+.secrets/*
+!.secrets/.gitignore
+!.secrets/.example
+
+# Python (backend)
+__pycache__/
+*.py[cod]
+*.pyd
+.python-version
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build / packaging artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Django artifacts
+*.sqlite3
+staticfiles/
+media/
+
+# Node / Expo (mobile)
+node_modules/
+.expo/
+.expo-shared/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript / bundler caches
+*.tsbuildinfo
+.cache/
+coverage/
