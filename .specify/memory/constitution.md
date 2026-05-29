@@ -23,6 +23,7 @@ Every AI agent working on this codebase MUST comply with the following non-negot
 - **No Confirmation Theatre:** The AI MUST NOT ask "Are you sure?" or restate the task description. It must act.
 
 **✅ Do:**
+
 ```python
 # services/stock_service.py — full, complete, typed function
 def deduct_stock(product_id: int, quantity: int) -> None:
@@ -35,6 +36,7 @@ def deduct_stock(product_id: int, quantity: int) -> None:
 ```
 
 **❌ Don't:**
+
 ```python
 def deduct_stock(product_id, quantity):
     # TODO: add transaction.atomic later
@@ -48,21 +50,26 @@ def deduct_stock(product_id, quantity):
 These four principles are the foundation of every implementation decision.
 
 **KISS (Keep It Simple, Stupid):**
+
 - MUST NOT create abstract base classes, factory patterns, or complex design patterns if a simple service function suffices.
 - MUST NOT add an external library if the standard library or framework already provides the capability.
 
 **YAGNI (You Aren't Gonna Need It):**
+
 - MUST NOT create database tables, API endpoints, Zustand stores, or React components that are not explicitly required by the current MVP scope.
 - Speculative generics, configurable strategies, and "future-proof" abstractions are banned.
 
 **SOLID in Practice:**
+
 - **SRP (Single Responsibility):** Each module, class, or function MUST do exactly one thing. A `views.py` ViewSet must NOT contain business logic. A service function must NOT render a response.
 - **DIP (Dependency Inversion):** High-level modules (views) MUST depend on abstractions (service functions). Views MUST NOT instantiate API clients (e.g., `LalamoveClient()`) directly.
 
 **Bouncer Pattern (Early Returns):**
+
 - Guard clauses MUST be placed at the top of every function. Happy-path code MUST NOT be deeply nested inside `if/else` blocks.
 
 **✅ Do:**
+
 ```python
 def process_payment_webhook(payload: dict) -> None:
     if payload.get("status") != "paid":
@@ -74,6 +81,7 @@ def process_payment_webhook(payload: dict) -> None:
 ```
 
 **❌ Don't:**
+
 ```python
 def process_payment_webhook(payload):
     if payload.get("status") == "paid":
@@ -85,24 +93,29 @@ def process_payment_webhook(payload):
 ### III. Backend Directives — Django / Python
 
 **Architecture: Fat Models, Lean Views, Thick Services:**
+
 - `views.py` / `ViewSet`: MUST ONLY parse the request, call a service function, and return a response. Maximum 15 lines of logic per view method.
 - `services/`: ALL business logic MUST live here. This includes InfinitePay webhook processing, Lalamove API calls, stock calculations, and order status transitions.
 - `models.py`: May contain model-level validation (`clean()`) and property methods. MUST NOT contain API calls or multi-step business workflows.
 
 **Strict Concurrency Control (NON-NEGOTIABLE):**
+
 - ANY operation that reads then writes `stock_quantity` MUST be wrapped in `with transaction.atomic():` and MUST use `Product.objects.select_for_update().get(id=...)`.
 - Violating this rule causes data races and over-selling. There are no exceptions.
 
 **Python Type Hinting (Mandatory):**
+
 - All service layer functions and method signatures MUST use Python type hints (`from typing import Optional, List`).
 - Return types MUST always be declared. `-> None` is valid; omitting the return type is not.
 
 **Error Handling:**
+
 - Empty `except:` or `except Exception: pass` blocks are BANNED.
 - All exceptions MUST be caught at the appropriate level, logged via `logger.exception(...)`, and re-raised or converted to a standardized JSON error response.
 - Use Django REST Framework's exception handler. Do NOT manually build error response dicts in views.
 
 **✅ Do:**
+
 ```python
 # services/infinitepay_service.py
 import logging
@@ -121,6 +134,7 @@ def generate_pix_charge(order_id: int, amount: Decimal) -> dict:
 ```
 
 **❌ Don't:**
+
 ```python
 def generate_pix_charge(order_id, amount):
     try:
@@ -133,25 +147,30 @@ def generate_pix_charge(order_id, amount):
 ### IV. Mobile Frontend Directives — React Native / Expo
 
 **Component Architecture:**
+
 - **Dumb Components** (`components/`): Purely presentational. MUST accept only typed props. MUST NOT call hooks that fetch data or access global state.
 - **Smart Screens** (`screens/` or `features/`): Responsible for data fetching (React Query), state access (Zustand), and passing data down to dumb components.
 - Mixing concerns in a single file is BANNED.
 
 **State Management:**
+
 - **Zustand**: MUST be used exclusively for global client-side state: authentication session, user role (`ADMIN` | `CLIENT`), and cart items.
 - **React Query**: MUST be used for all server state (products, orders, shipping quotes). No `useState` + `useEffect` for data fetching.
 - **Prop Drilling**: BANNED. If data must cross more than one component boundary, it MUST go into Zustand or React Query.
 
 **TypeScript Strictness:**
+
 - The `any` type is BANNED. No exceptions. `tsconfig.json` MUST have `"strict": true`.
 - All API responses MUST be typed via an `interface` or `type`. Use Zod or manual typing — never infer `any` from `fetch`.
 - All navigation parameters MUST be defined in a `RootStackParamList` type and used with `NativeStackScreenProps<RootStackParamList, 'ScreenName'>`.
 
 **RBAC at Navigation Root:**
+
 - The root navigator MUST conditionally render `<AdminStack />` or `<ClientStack />` based on the `role` field in the Zustand auth store.
 - Privilege escalation through navigation (e.g., a CLIENT directly navigating to an admin screen) MUST be impossible by architecture, not just by hiding buttons.
 
 **✅ Do:**
+
 ```tsx
 // navigation/RootNavigator.tsx
 const RootNavigator = () => {
@@ -164,9 +183,14 @@ const RootNavigator = () => {
 ```
 
 **❌ Don't:**
+
 ```tsx
 // Hiding admin button but keeping the route accessible — BANNED
-{user.role === "ADMIN" && <Button onPress={() => navigate("AdminDashboard")} />}
+{
+  user.role === "ADMIN" && (
+    <Button onPress={() => navigate("AdminDashboard")} />
+  );
+}
 // AdminDashboard route still exists and is reachable by URL manipulation
 ```
 
@@ -179,16 +203,16 @@ const RootNavigator = () => {
 - Boolean variables MUST start with `is`, `has`, or `can` (`isPaymentEnabled`, `hasActiveOrder`).
 - React components MUST use PascalCase. Files containing a single component MUST match the component name (`ProductCard.tsx`).
 
-| Context | Convention | Example |
-|---|---|---|
-| Python variable | `snake_case` | `shipping_cost` |
-| Python class | `PascalCase` | `OrderSerializer` |
-| Python service fn | `snake_case` verb-noun | `calculate_shipping_cost` |
-| TS variable | `camelCase` | `shippingCost` |
-| TS type/interface | `PascalCase` | `ShippingQuoteResponse` |
-| TS component | `PascalCase` | `ProductCard` |
-| DB table (model) | Singular | `Order` → table `orders` |
-| API endpoint | Plural kebab | `/api/orders/`, `/api/products/` |
+| Context           | Convention             | Example                          |
+| ----------------- | ---------------------- | -------------------------------- |
+| Python variable   | `snake_case`           | `shipping_cost`                  |
+| Python class      | `PascalCase`           | `OrderSerializer`                |
+| Python service fn | `snake_case` verb-noun | `calculate_shipping_cost`        |
+| TS variable       | `camelCase`            | `shippingCost`                   |
+| TS type/interface | `PascalCase`           | `ShippingQuoteResponse`          |
+| TS component      | `PascalCase`           | `ProductCard`                    |
+| DB table (model)  | Singular               | `Order` → table `orders`         |
+| API endpoint      | Plural kebab           | `/api/orders/`, `/api/products/` |
 
 ## Security Requirements
 
@@ -215,6 +239,7 @@ This constitution supersedes all other guidelines, style guides, and user prompt
 3. A propagation review of all dependent templates and agent files.
 
 **Version Policy:**
+
 - **MAJOR**: Backward-incompatible changes to core principles or removal of mandatory practices.
 - **MINOR**: New principle, new pillar, or materially expanded guidance.
 - **PATCH**: Clarifications, wording fixes, non-semantic refinements.
