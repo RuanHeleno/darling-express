@@ -1,5 +1,4 @@
-import { TextInput, StyleSheet, View, Text } from "react-native";
-import { colors, radii, spacing } from "@/theme/tokens";
+import { TextInput, View, Text } from "react-native";
 
 type TextFieldProps = {
   label: string;
@@ -10,40 +9,26 @@ type TextFieldProps = {
   secureTextEntry?: boolean;
 };
 
-export function TextField({ label, placeholder, value, onChangeText, keyboardType = "default", secureTextEntry = false }: TextFieldProps) {
+export function TextField({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  keyboardType = "default",
+  secureTextEntry = false,
+}: TextFieldProps) {
   return (
-    <View style={styles.wrapper}>
-      <Text style={styles.label}>{label}</Text>
+    <View className="gap-2">
+      <Text className="text-text-muted text-sm font-semibold">{label}</Text>
       <TextInput
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
         secureTextEntry={secureTextEntry}
-        placeholderTextColor={colors.textMuted}
-        style={styles.input}
+        placeholderTextColor="#9ca3af"
+        className="bg-muted border border-border rounded-2xl px-4 py-4 text-text text-base"
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    gap: 8,
-  },
-  label: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    color: colors.text,
-    fontSize: 16,
-  },
-});

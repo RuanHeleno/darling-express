@@ -1,46 +1,40 @@
 import { PropsWithChildren } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
-import { colors, spacing } from "@/theme/tokens";
+import { SafeAreaView, ScrollView, Text, View } from "react-native";
 
 type AppShellProps = PropsWithChildren<{
-  title: string;
+  title?: string;
   subtitle?: string;
+  /** When true, removes the default header block and padding so screens can own their own layout */
+  bare?: boolean;
 }>;
 
-export function AppShell({ title, subtitle, children }: AppShellProps) {
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-        </View>
+export function AppShell({ title, subtitle, children, bare = false }: AppShellProps) {
+  if (bare) {
+    return (
+      <SafeAreaView className="flex-1 bg-muted">
         {children}
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-muted">
+      <ScrollView
+        contentContainerClassName="gap-5 pb-10"
+        showsVerticalScrollIndicator={false}
+      >
+        {title ? (
+          <View className="px-6 pt-6 gap-1">
+            <Text className="text-brand-dark text-3xl font-bold tracking-tight">
+              {title}
+            </Text>
+            {subtitle ? (
+              <Text className="text-text-muted text-base leading-6">{subtitle}</Text>
+            ) : null}
+          </View>
+        ) : null}
+        <View className="px-6 gap-5">{children}</View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  header: {
-    gap: spacing.xs,
-  },
-  title: {
-    color: colors.primaryDark,
-    fontSize: 28,
-    fontWeight: "700",
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: 16,
-    lineHeight: 22,
-  },
-});

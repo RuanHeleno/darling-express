@@ -1,46 +1,24 @@
 import { PropsWithChildren } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { colors, radii, spacing } from "@/theme/tokens";
+import { Text, View } from "react-native";
 
 type SectionCardProps = PropsWithChildren<{
-  title: string;
+  title?: string;
   actionLabel?: string;
+  onAction?: () => void;
 }>;
 
 export function SectionCard({ title, actionLabel, children }: SectionCardProps) {
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        {actionLabel ? <Text style={styles.action}>{actionLabel}</Text> : null}
-      </View>
+    <View className="bg-surface rounded-3xl p-5 gap-4 shadow-sm border border-border">
+      {title ? (
+        <View className="flex-row justify-between items-center">
+          <Text className="text-brand-dark text-lg font-bold">{title}</Text>
+          {actionLabel ? (
+            <Text className="text-rose-medium text-sm font-semibold">{actionLabel}</Text>
+          ) : null}
+        </View>
+      ) : null}
       {children}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.md,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  title: {
-    color: colors.primaryDark,
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  action: {
-    color: colors.secondary,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-});
