@@ -15,9 +15,11 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.darlingexpress.app",
       "supportsTablet": false
     },
     "android": {
+      "package": "com.darlingexpress.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#f6faff"
@@ -30,6 +32,12 @@
       "eas": {
         "projectId": "darling-express"
       }
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }
