@@ -91,3 +91,5 @@
 4. Promote track after quality gates pass.
 
 Detailed runbook: `specs/001-esmalteria-express-mvp/release-playstore.md`.
+
+Detailed go-live checklist: `specs/001-esmalteria-express-mvp/go-live-checklist-hostinger-playstore.md`.

@@ -75,6 +75,7 @@ export function CheckoutScreen() {
       }
 
       let quotedPrice = shippingQuoteData?.price;
+      let quoteId = shippingQuoteData?.quote_id;
       if (!isFreeShipping && !quotedPrice && canQuoteShipping) {
         const quote = await quoteShippingAsync({
           client_lat: clientLat,
@@ -82,6 +83,7 @@ export function CheckoutScreen() {
           items: quoteItems,
         });
         quotedPrice = quote.price;
+        quoteId = quote.quote_id;
       }
 
       if (!isFreeShipping && !quotedPrice) {
@@ -94,6 +96,7 @@ export function CheckoutScreen() {
         client_lat: clientLat ?? undefined,
         client_lng: clientLng ?? undefined,
         shipping_cost: isFreeShipping ? "0.00" : String(quotedPrice),
+        quote_id: isFreeShipping ? undefined : quoteId,
       });
       setPixCode(result.pix_code);
       setOrderId(result.order_id);

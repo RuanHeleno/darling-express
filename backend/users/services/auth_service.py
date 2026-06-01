@@ -37,6 +37,9 @@ def issue_magic_link(phone: str) -> dict:
     refresh = RefreshToken.for_user(user)
     access = refresh.access_token
 
+    # Include role claim so deep-link login can route by RBAC without API fetch.
+    access["role"] = user.role
+
     # Override lifetime to match configured session days
     lifetime = timedelta(days=_SESSION_DAYS)
     access.set_exp(lifetime=lifetime)

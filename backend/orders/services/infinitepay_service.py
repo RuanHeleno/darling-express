@@ -97,14 +97,13 @@ def record_and_process_webhook(payload_bytes: bytes, signature: str, settings) -
         OrderStatus,
     )
 
-    secret = (
-        settings.infinitepay_api_key or "change-me"
-    )  # spec uses api_key as hmac secret
     import os
+    from django.conf import settings as django_settings
 
-    env_secret = os.environ.get("INFINITEPAY_WEBHOOK_SECRET") or secret
-
-    data = process_webhook(payload_bytes, signature, env_secret)
+    secret = os.environ.get("INFINITEPAY_WEBHOOK_SECRET") or getattr(
+        django_settings, "INFINITEPAY_WEBHOOK_SECRET", ""
+    )
+    data = process_webhook(payload_bytes, signature, secret)
 
     event_id = data.get("id") or data.get("event_id") or str(uuid.uuid4())
     payload_hash = hashlib.sha256(payload_bytes).hexdigest()

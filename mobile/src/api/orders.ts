@@ -23,6 +23,7 @@ export type PayOrderRequest = {
   client_lat?: number;
   client_lng?: number;
   shipping_cost: string;
+  quote_id?: string;
 };
 
 export type PayOrderResponse = {
@@ -59,27 +60,29 @@ export type Order = {
 };
 
 export async function quoteShipping(
-  payload: ShippingQuoteRequest
+  payload: ShippingQuoteRequest,
 ): Promise<ShippingQuoteResponse> {
   const { data } = await apiClient.post<ShippingQuoteResponse>(
     "/api/orders/shipping-quote",
-    payload
+    payload,
   );
   return data;
 }
 
 export async function payOrder(
-  payload: PayOrderRequest
+  payload: PayOrderRequest,
 ): Promise<PayOrderResponse> {
   const { data } = await apiClient.post<PayOrderResponse>(
     "/api/orders/pay",
-    payload
+    payload,
   );
   return data;
 }
 
 export async function fetchDashboard(): Promise<DashboardSummary> {
-  const { data } = await apiClient.get<DashboardSummary>("/api/orders/dashboard");
+  const { data } = await apiClient.get<DashboardSummary>(
+    "/api/orders/dashboard",
+  );
   return data;
 }
 

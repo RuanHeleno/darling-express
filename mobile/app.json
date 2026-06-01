@@ -28,11 +28,6 @@
     "web": {
       "bundler": "metro"
     },
-    "extra": {
-      "eas": {
-        "projectId": "darling-express"
-      }
-    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },

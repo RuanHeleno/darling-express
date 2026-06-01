@@ -15,7 +15,10 @@ if TYPE_CHECKING:
 
 
 def settle_order(
-    user, items: list, shipping_cost: Decimal = Decimal("0.00")
+    user,
+    items: list,
+    shipping_cost: Decimal = Decimal("0.00"),
+    lalamove_quote_id: str = "",
 ) -> "Order":
     """
     Create an Order and deduct stock atomically.
@@ -31,7 +34,9 @@ def settle_order(
         # Lock products in ascending id order to prevent deadlocks
         products = {
             p.pk: p
-            for p in Product.objects.select_for_update().filter(pk__in=product_ids)
+            for p in Product.objects.select_for_update()
+            .filter(pk__in=product_ids)
+            .order_by("id")
         }
 
         # Validate stock
@@ -70,6 +75,8 @@ def settle_order(
             subtotal=subtotal,
             shipping_cost=shipping_cost,
             total=total,
+            # Store quote id until dispatch. Field is overwritten with provider order id after dispatch.
+            lalamove_order_id=lalamove_quote_id,
         )
 
         # Create items

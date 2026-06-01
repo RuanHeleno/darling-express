@@ -63,3 +63,9 @@ Keep production URL injected via Expo env at build time.
 - Keep previous image tags available for fast rollback.
 - Use `docker compose -f compose.prod.yaml up -d` with pinned image tags for deterministic redeploy.
 - Keep daily database backups and restore drills documented.
+
+## 7. Full launch checklist
+
+Use the complete end-to-end checklist:
+
+- `specs/001-esmalteria-express-mvp/go-live-checklist-hostinger-playstore.md`

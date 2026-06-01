@@ -10,6 +10,10 @@ module.exports = {
           dark: "#300033",
           light: "#6b2070",
         },
+        // Aliases used across screens/components (bg-primary, text-primaryDark, bg-secondary)
+        primary: "#4a154b",
+        primaryDark: "#300033",
+        secondary: "#b76e79",
         rose: {
           soft: "#f4c2c2",
           medium: "#b76e79",

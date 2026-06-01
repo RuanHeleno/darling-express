@@ -137,6 +137,8 @@
 - [x] T061 Add production Docker Compose topology (`api`, `celery_worker`, `celery_beat`, `redis`, `postgres`, `nginx`) in `compose.prod.yaml`
 - [x] T062 Document Android release + Hostinger deployment runbook in `specs/001-esmalteria-express-mvp/quickstart.md` and `specs/001-esmalteria-express-mvp/release-playstore.md`
 - [x] T063 Configure TLS termination in production Nginx (`deploy/nginx/prod.conf`) and wire certificate mounts in `compose.prod.yaml`
+- [x] T064 Create detailed end-to-end go-live checklist (domain, Hostinger infra, backend deploy, Android release, and Play rollout) in `specs/001-esmalteria-express-mvp/go-live-checklist-hostinger-playstore.md`
+- [x] T065 Apply PR hardening fixes for JWT role claim, deterministic product locking, webhook secret source, websocket authz, quotation persistence, theme aliases, required production secrets, and EAS config sanity
 
 ---
 

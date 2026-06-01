@@ -65,6 +65,7 @@ class PayOrderView(APIView):
     def post(self, request):
         items_data = request.data.get("items", [])
         quote_price = Decimal(str(request.data.get("shipping_cost", "0.00")))
+        quote_id = str(request.data.get("quote_id", "") or "")
 
         settings = SystemSettings.get()
 
@@ -90,6 +91,7 @@ class PayOrderView(APIView):
                 for i in items_data
             ],
             shipping_cost=shipping_cost,
+            lalamove_quote_id=quote_id,
         )
 
         if not settings.payments_enabled:
