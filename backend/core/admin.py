@@ -1,4 +1,11 @@
 from django.contrib import admin
-from .models import SystemSetting
+from .models import SystemSettings
 
-admin.site.register(SystemSetting)
+
+@admin.register(SystemSettings)
+class SystemSettingsAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return not SystemSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False

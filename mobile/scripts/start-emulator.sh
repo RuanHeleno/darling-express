@@ -22,13 +22,21 @@ EXISTING=$(lsof -ti tcp:8081 2>/dev/null || true)
 if [ -n "$EXISTING" ]; then
   echo "Killing existing process(es) on port 8081 (pids: $(echo $EXISTING | tr '\n' ' '))..."
   echo "$EXISTING" | xargs kill -9 2>/dev/null || true
-  sleep 2
+  sleep 1
 fi
 
-CI=1 npx expo start --localhost --clear &
+# Start Metro with watch mode enabled (no CI=1) and open on Android
+npx expo start --localhost --clear --android &
 EXPO_PID=$!
 
-sleep 8
-adb shell am start -a android.intent.action.VIEW -d 'exp://127.0.0.1:8081' host.exp.exponent >/dev/null
+# Poll until Metro is ready (up to 30 s)
+echo "Waiting for Metro on :8081..."
+for i in $(seq 1 30); do
+  if curl -sf http://localhost:8081/status >/dev/null 2>&1; then
+    echo "Metro ready — Fast Refresh is active."
+    break
+  fi
+  sleep 1
+done
 
-wait "$EXPO_PID" || true
+wait "$EXPO_PID"

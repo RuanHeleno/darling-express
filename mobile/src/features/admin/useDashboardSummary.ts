@@ -1,20 +1,10 @@
-import { useMemo } from "react";
-
-export type DashboardSummary = {
-  approvedOrders: number;
-  pendingOrders: number;
-  lowStockProducts: number;
-  activeClients: number;
-};
+import { useQuery } from "@tanstack/react-query";
+import { fetchDashboard } from "@/api/orders";
 
 export function useDashboardSummary() {
-  return useMemo<DashboardSummary>(
-    () => ({
-      approvedOrders: 18,
-      pendingOrders: 6,
-      lowStockProducts: 4,
-      activeClients: 124,
-    }),
-    [],
-  );
+  return useQuery({
+    queryKey: ["dashboard"],
+    queryFn: fetchDashboard,
+    refetchInterval: 30_000, // refresh every 30s
+  });
 }

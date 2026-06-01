@@ -1,3 +1,8 @@
-from django.urls import path
+"""Users URL configuration."""
 
-urlpatterns = []
+from django.urls import path
+from .views import MagicLinkView
+
+urlpatterns = [
+    path("magic-link", MagicLinkView.as_view(), name="magic-link"),
+]

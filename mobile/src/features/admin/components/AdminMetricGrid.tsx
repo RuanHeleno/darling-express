@@ -1,7 +1,7 @@
 import { View, StyleSheet } from "react-native";
 import { StatCard } from "@/components/StatCard";
 import { spacing } from "@/theme/tokens";
-import type { DashboardSummary } from "@/features/admin/useDashboardSummary";
+import type { DashboardSummary } from "@/api/orders";
 
 type AdminMetricGridProps = {
   summary: DashboardSummary;
@@ -10,10 +10,10 @@ type AdminMetricGridProps = {
 export function AdminMetricGrid({ summary }: AdminMetricGridProps) {
   return (
     <View style={styles.grid}>
-      <StatCard label="Pedidos aprovados" value={summary.approvedOrders.toString()} tone="success" />
-      <StatCard label="Pendentes" value={summary.pendingOrders.toString()} tone="warning" />
-      <StatCard label="Estoque crítico" value={summary.lowStockProducts.toString()} tone="danger" />
-      <StatCard label="Clientes ativos" value={summary.activeClients.toString()} />
+      <StatCard label="Total de pedidos" value={summary.total_orders.toString()} tone="default" />
+      <StatCard label="Pendentes" value={summary.pending.toString()} tone="warning" />
+      <StatCard label="Em andamento" value={summary.in_progress.toString()} tone="success" />
+      <StatCard label="Entregues" value={summary.delivered.toString()} />
     </View>
   );
 }

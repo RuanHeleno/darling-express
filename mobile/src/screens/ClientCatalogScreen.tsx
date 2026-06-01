@@ -1,76 +1,98 @@
-import { View, Text, StyleSheet } from "react-native";
-import { AppShell, Badge, PrimaryButton, SectionCard } from "@/components";
+import { FlatList, View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useNavigation, type NavigationProp } from "@react-navigation/native";
+import { AppShell, Badge } from "@/components";
 import { useCatalog } from "@/features/catalog/useCatalog";
-import { colors, spacing } from "@/theme/tokens";
+import { useCartStore } from "@/stores/cartStore";
+import type { Product } from "@/api/catalog";
+import type { ClientStackParamList } from "@/navigation/ClientStack";
 
-export function ClientCatalogScreen() {
-  const catalog = useCatalog();
+function ProductCard({ product }: { product: Product }) {
+  const addItem = useCartStore((s) => s.addItem);
+  const inStock = product.stock_quantity > 0;
 
   return (
-    <AppShell title="Catálogo" subtitle="Navegue por categorias, estoque e preços antes de adicionar ao carrinho.">
-      <SectionCard title="Destaques" actionLabel={catalog.isLoading ? "Carregando" : `${catalog.data?.length ?? 0} itens`}>
-        <View style={styles.heroRow}>
-          <Badge label="Entrega rastreada" tone="accent" />
-          <Badge label="Estoque ao vivo" tone="success" />
-        </View>
-        <Text style={styles.description}>A vitrine prioriza leitura rápida, cards 1:1 e sinais claros de disponibilidade.</Text>
-        <PrimaryButton label="Ver carrinho" />
-      </SectionCard>
-
-      <SectionCard title="Itens populares">
-        <View style={styles.list}>
-          {(catalog.data ?? [
-            { id: "1", name: "Esmalte Nude", stock_quantity: 12, price: "18,90" },
-            { id: "2", name: "Top Coat Brilho", stock_quantity: 4, price: "29,90" },
-            { id: "3", name: "Kit Hidratação", stock_quantity: 9, price: "59,90" },
-          ]).map((product) => (
-            <View key={product.id} style={styles.item}>
-              <View>
-                <Text style={styles.itemTitle}>{product.name}</Text>
-                <Text style={styles.itemMeta}>Estoque: {product.stock_quantity}</Text>
-              </View>
-              <Text style={styles.itemPrice}>R$ {product.price}</Text>
-            </View>
-          ))}
-        </View>
-      </SectionCard>
-    </AppShell>
+    <View className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100">
+      <View className="flex-row justify-between items-start mb-2">
+        <Text className="text-primaryDark font-bold text-base flex-1 mr-2" numberOfLines={2}>
+          {product.name}
+        </Text>
+        <Badge label={inStock ? "Em estoque" : "Esgotado"} tone={inStock ? "success" : "danger"} />
+      </View>
+      {product.description ? (
+        <Text className="text-gray-500 text-sm mb-2" numberOfLines={2}>
+          {product.description}
+        </Text>
+      ) : null}
+      <View className="flex-row justify-between items-center mt-2">
+        <Text className="text-primary font-bold text-lg">
+          R$ {Number(product.price).toFixed(2).replace(".", ",")}
+        </Text>
+        <TouchableOpacity
+          onPress={() =>
+            addItem({
+              product_id: Number(product.id),
+              name: product.name,
+              unit_price: Number(product.price),
+            })
+          }
+          disabled={!inStock}
+          className={`px-4 py-2 rounded-xl ${inStock ? "bg-primary" : "bg-gray-300"}`}
+        >
+          <Text className="text-white font-semibold text-sm">Adicionar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  heroRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    flexWrap: "wrap",
-  },
-  description: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  list: {
-    gap: spacing.sm,
-  },
-  item: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: 8,
-    padding: spacing.md,
-  },
-  itemTitle: {
-    color: colors.primaryDark,
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  itemMeta: {
-    color: colors.textMuted,
-    marginTop: 4,
-  },
-  itemPrice: {
-    color: colors.primary,
-    fontWeight: "700",
-  },
-});
+export function ClientCatalogScreen() {
+  const { data: products, isLoading, isError } = useCatalog();
+  const itemCount = useCartStore((s) => s.itemCount());
+  const navigation = useNavigation<NavigationProp<ClientStackParamList>>();
+
+  return (
+    <AppShell
+      title="Catálogo"
+      subtitle={isLoading ? "Carregando..." : `${products?.length ?? 0} produtos`}
+    >
+      {isLoading && (
+        <View className="flex-1 items-center justify-center py-16">
+          <ActivityIndicator size="large" color="#4a154b" />
+          <Text className="text-gray-500 mt-3">Carregando produtos...</Text>
+        </View>
+      )}
+
+      {isError && (
+        <View className="bg-red-50 rounded-2xl p-4 mb-4">
+          <Text className="text-red-700 font-semibold">Erro ao carregar catálogo.</Text>
+          <Text className="text-red-500 text-sm mt-1">Verifique sua conexão e tente novamente.</Text>
+        </View>
+      )}
+
+      {!isLoading && products && (
+        <FlatList
+          data={products}
+          keyExtractor={(p) => String(p.id)}
+          renderItem={({ item }) => <ProductCard product={item} />}
+          ListEmptyComponent={
+            <View className="items-center py-16">
+              <Text className="text-gray-400 text-base">Nenhum produto disponível.</Text>
+            </View>
+          }
+          scrollEnabled={false}
+        />
+      )}
+
+      {itemCount > 0 && (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Cart")}
+          className="bg-primary rounded-2xl py-4 items-center mt-4"
+        >
+          <Text className="text-white font-bold text-base">
+            Ver carrinho ({itemCount} {itemCount === 1 ? "item" : "itens"})
+          </Text>
+        </TouchableOpacity>
+      )}
+    </AppShell>
+  );
+}

@@ -54,6 +54,8 @@ media/
 node_modules/
 .expo/
 .expo-shared/
+mobile/android/
+mobile/ios/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

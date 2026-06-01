@@ -21,7 +21,10 @@ def read_secret(name: str, default: str = "change-me") -> str:
 
 SECRET_KEY = read_secret("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
-ALLOWED_HOSTS = [host.strip() for host in env("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")]
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in env("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -31,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
     "channels",
     "users",
@@ -89,17 +93,20 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "EXCEPTION_HANDLER": "api.exceptions.api_exception_handler",
 }
 
 CORS_ALLOWED_ORIGINS = [
     origin.strip()
-    for origin in env("DJANGO_CORS_ALLOWED_ORIGINS", default="http://localhost:8081").split(",")
+    for origin in env(
+        "DJANGO_CORS_ALLOWED_ORIGINS", default="http://localhost:8081"
+    ).split(",")
     if origin.strip()
 ]
 
@@ -110,6 +117,24 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [CELERY_BROKER_URL],
+            "expiry": 60,
+            "group_expiry": 86400,
         },
     }
 }
+
+AUTH_USER_MODEL = "users.CustomUser"
+
+MAGIC_LINK_LIFETIME_DAYS = 7
+
+from datetime import timedelta  # noqa: E402
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+INFINITEPAY_WEBHOOK_SECRET = env("INFINITEPAY_WEBHOOK_SECRET", default="change-me")

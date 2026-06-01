@@ -1,35 +1,68 @@
-import { View, Text, StyleSheet } from "react-native";
-import { AppShell, Badge, SectionCard } from "@/components";
-import { colors, spacing } from "@/theme/tokens";
+import { View, Text, ActivityIndicator, RefreshControl, ScrollView } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import { AppShell } from "@/components";
+import { fetchOrders } from "@/api/orders";
+import type { Order } from "@/api/orders";
 
-export function OrdersKanbanScreen() {
+const COLUMNS: { status: string; label: string; color: string }[] = [
+  { status: "PENDING", label: "Pendentes", color: "bg-amber-100 border-amber-300" },
+  { status: "APPROVED_PREPARING", label: "Em preparo", color: "bg-blue-100 border-blue-300" },
+  { status: "IN_TRANSIT", label: "Em trânsito", color: "bg-purple-100 border-purple-300" },
+  { status: "DELIVERED", label: "Entregues", color: "bg-green-100 border-green-300" },
+];
+
+function OrderCard({ order }: { order: Order }) {
   return (
-    <AppShell title="Pedidos" subtitle="Organize o fluxo do salão em colunas visuais e atualize os status com segurança.">
-      <View style={styles.columns}>
-        <SectionCard title="Aguardando" actionLabel="6">
-          <Badge label="Novo PIX" tone="warning" />
-          <Text style={styles.cardText}>Pedidos aguardando confirmação do pagamento.</Text>
-        </SectionCard>
-        <SectionCard title="Preparando" actionLabel="12">
-          <Badge label="Separação" tone="accent" />
-          <Text style={styles.cardText}>Pedidos aprovados com estoque já debitado.</Text>
-        </SectionCard>
-        <SectionCard title="Em rota" actionLabel="9">
-          <Badge label="Courier ativo" tone="success" />
-          <Text style={styles.cardText}>Pedidos com rastreio e entrega em andamento.</Text>
-        </SectionCard>
-      </View>
-    </AppShell>
+    <View className="bg-white rounded-xl p-3 mb-2 border border-gray-100 shadow-sm">
+      <Text className="font-bold text-primaryDark text-sm">#{order.id}</Text>
+      <Text className="text-gray-500 text-xs mt-0.5">
+        {new Date(order.created_at).toLocaleDateString("pt-BR")}
+      </Text>
+      <Text className="text-primary font-semibold text-sm mt-1">
+        R$ {Number(order.total).toFixed(2).replace(".", ",")}
+      </Text>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  columns: {
-    gap: spacing.md,
-  },
-  cardText: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-});
+export function OrdersKanbanScreen() {
+  const { data: orders, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["orders"],
+    queryFn: fetchOrders,
+    refetchInterval: 15_000,
+  });
+
+  return (
+    <AppShell title="Pedidos" subtitle="Kanban de status">
+      {isLoading && (
+        <View className="py-16 items-center">
+          <ActivityIndicator size="large" color="#4a154b" />
+        </View>
+      )}
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="flex-row"
+        refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
+      >
+        {COLUMNS.map((col) => {
+          const colOrders = (orders ?? []).filter((o) => o.status === col.status);
+          return (
+            <View key={col.status} className={`w-48 rounded-2xl border p-3 mr-3 ${col.color}`}>
+              <Text className="font-bold text-gray-700 mb-2 text-sm">
+                {col.label} ({colOrders.length})
+              </Text>
+              {colOrders.map((order) => (
+                <OrderCard key={order.id} order={order} />
+              ))}
+              {colOrders.length === 0 && (
+                <Text className="text-gray-400 text-xs text-center py-4">Nenhum pedido</Text>
+              )}
+            </View>
+          );
+        })}
+      </ScrollView>
+    </AppShell>
+  );
+}
