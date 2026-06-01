@@ -134,6 +134,9 @@
 - [x] T058 Add API contract tests for `quote-shipping`, `pay`, `webhooks/infinitepay`, and `dispatch` in `backend/tests/contract/`
 - [x] T059 Add concurrency/idempotency integration tests for duplicate webhook and final-unit race scenarios in `backend/tests/integration/`
 - [x] T060 Add mobile integration test for delayed-webhook reconciliation on app reopen in `mobile/tests/integration/`
+- [x] T061 Add production Docker Compose topology (`api`, `celery_worker`, `celery_beat`, `redis`, `postgres`, `nginx`) in `compose.prod.yaml`
+- [x] T062 Document Android release + Hostinger deployment runbook in `specs/001-esmalteria-express-mvp/quickstart.md` and `specs/001-esmalteria-express-mvp/release-playstore.md`
+- [x] T063 Configure TLS termination in production Nginx (`deploy/nginx/prod.conf`) and wire certificate mounts in `compose.prod.yaml`
 
 ---
 

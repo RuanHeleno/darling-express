@@ -27,6 +27,13 @@ module.exports = defineConfig([
     },
   },
   {
-    ignores: ["node_modules/", ".expo/", "dist/"],
+    ignores: [
+      "node_modules/",
+      ".expo/",
+      "dist/",
+      "build/",
+      "coverage/",
+      "*.min.js",
+    ],
   },
 ]);
