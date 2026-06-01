@@ -1,0 +1,99 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+        exclude: ^backend/.*/migrations/.*\.py$
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ["--maxkb=1500"]
+
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format
+        language: system
+        files: ^backend/.*\.py$
+        exclude: ^backend/.*/migrations/.*\.py$
+        entry: uv run --project backend ruff format
+        pass_filenames: true
+
+      - id: ruff-lint
+        name: ruff lint
+        language: system
+        files: ^backend/.*\.py$
+        exclude: ^backend/.*/migrations/.*\.py$
+        entry: uv run --project backend ruff check --fix
+        pass_filenames: true
+
+      - id: pyright
+        name: pyright
+        language: system
+        files: \.py$
+        entry: bash
+        args:
+          - -c
+          - >-
+            cd backend && uv run pyright
+        pass_filenames: false
+
+      - id: pytest
+        stages: [pre-push]
+        types: [python]
+        name: pytest (fast tests)
+        entry: bash -c 'cd backend && uv run pytest -m "not slow and not integration" --maxfail=3 -q'
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: eslint
+        name: eslint
+        language: system
+        files: ^mobile/.*\.(ts|tsx)$
+        entry: bash
+        args:
+          - -c
+          - |
+            set -euo pipefail
+            ROOT="$(git rev-parse --show-toplevel)"
+            MOBILE="$ROOT/mobile"
+            cd "$MOBILE" || exit 1
+            if [ ! -x node_modules/.bin/eslint ]; then yarn install --frozen-lockfile || exit 1; fi
+            paths=()
+            for _arg in "$@"; do
+              case "$_arg" in
+                "$MOBILE"/*)
+                  paths+=("${_arg#$MOBILE/}")
+                  ;;
+                *)
+                  paths+=("${_arg#mobile/}")
+                  ;;
+              esac
+            done
+            if [ "${#paths[@]}" -eq 0 ]; then exit 0; fi
+            exec ./node_modules/.bin/eslint --fix --max-warnings=0 "${paths[@]}"
+          - --
+        pass_filenames: true
+
+      - id: jest
+        stages: [pre-push]
+        name: jest (mobile tests)
+        language: system
+        files: \.(ts|tsx)$
+        entry: bash -c 'cd mobile && if [ -d "src/__tests__" ] || find src -name "*.test.ts*" -type f | grep -q .; then yarn test --bail --passWithNoTests; else echo "No tests found, skipping"; fi'
+        pass_filenames: false
+
+      - id: typescript-check
+        name: TypeScript type check
+        language: system
+        entry: bash
+        args:
+          - -c
+          - >-
+            cd mobile && if [ ! -x node_modules/.bin/tsc ]; then yarn install --frozen-lockfile || exit 1; fi && ./node_modules/.bin/tsc --noEmit
+        files: ^mobile/.*\.(ts|tsx)$
+        pass_filenames: false
+        always_run: true

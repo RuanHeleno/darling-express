@@ -1,0 +1,15 @@
+node_modules/
+.expo/
+.expo-shared/
+android/
+ios/
+.git/
+.gitignore
+.vscode/
+.idea/
+coverage/
+dist/
+build/
+*.log
+Dockerfile
+*.md

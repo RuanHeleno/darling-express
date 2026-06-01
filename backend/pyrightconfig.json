@@ -1,0 +1,20 @@
+{
+  "typeCheckingMode": "basic",
+  "include": ["**/*.py"],
+  "exclude": [
+    "**/migrations/**",
+    "tests/**",
+    ".venv/**",
+    "**/__pycache__/**"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "reportAttributeAccessIssue": "none",
+  "reportAssignmentType": "none",
+  "reportArgumentType": "none",
+  "reportGeneralTypeIssues": "none",
+  "reportCallIssue": "none",
+  "reportIndexIssue": "none",
+  "reportOptionalSubscript": "none",
+  "reportIncompatibleVariableOverride": "none"
+}

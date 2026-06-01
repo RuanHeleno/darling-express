@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Darling Express",
+    "slug": "darling-express",
+    "scheme": "esmalteria",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#f6faff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.darlingexpress.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.darlingexpress.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f6faff"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}

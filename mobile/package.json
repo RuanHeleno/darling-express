@@ -1,0 +1,52 @@
+{
+  "name": "darling-express-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "emulator": "emulator -avd Pixel_6_API_34 -no-metrics",
+    "start:usb": "bash ./scripts/start-usb.sh",
+    "start:emulator": "bash ./scripts/start-emulator.sh",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "eas:build:android:dev": "npx eas build --platform android --profile development",
+    "eas:build:android:preview": "npx eas build --platform android --profile preview",
+    "eas:build:android:prod": "npx eas build --platform android --profile production",
+    "eas:build:ios:dev": "npx eas build --platform ios --profile development",
+    "eas:build:ios:preview": "npx eas build --platform ios --profile preview",
+    "eas:build:ios:prod": "npx eas build --platform ios --profile production",
+    "eas:submit:android": "npx eas submit --platform android --profile production",
+    "eas:submit:ios": "npx eas submit --platform ios --profile production"
+  },
+  "dependencies": {
+    "@react-navigation/bottom-tabs": "^6.6.1",
+    "@react-navigation/native": "^6.1.18",
+    "@react-navigation/native-stack": "^6.11.0",
+    "@tanstack/react-query": "^5.51.23",
+    "axios": "^1.7.7",
+    "expo": "^54.0.0",
+    "expo-status-bar": "~3.0.9",
+    "nativewind": "^4.1.23",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "tailwindcss": "^3.4.19",
+    "@types/react": "~19.1.10",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "eslint": "^9.10.0",
+    "eslint-config-expo": "~10.0.0",
+    "typescript": "~5.9.2"
+  }
+}
