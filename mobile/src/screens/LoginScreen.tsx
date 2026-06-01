@@ -1,12 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRoute, type RouteProp } from "@react-navigation/native";
 import { Badge, PrimaryButton, TextField } from "@/components";
 import { useMagicLink } from "@/features/auth/useMagicLink";
+import { useAuthStore, type UserRole } from "@/stores/authStore";
+import type { AuthStackParamList } from "@/navigation/AuthStack";
+
+function decodeRoleFromJwt(token: string): UserRole | null {
+  try {
+    const payloadPart = token.split(".")[1];
+    if (!payloadPart) {
+      return null;
+    }
+    const atobFn = (globalThis as { atob?: (data: string) => string }).atob;
+    if (!atobFn) {
+      return null;
+    }
+    const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+    const parsed = JSON.parse(atobFn(padded)) as { role?: unknown };
+    return parsed.role === "ADMIN" || parsed.role === "CLIENT" ? parsed.role : null;
+  } catch {
+    return null;
+  }
+}
 
 export function LoginScreen() {
+  const route = useRoute<RouteProp<AuthStackParamList, "Login">>();
+  const setSession = useAuthStore((state) => state.setSession);
   const [phone, setPhone] = useState("+55 ");
   const magicLink = useMagicLink();
+
+  useEffect(() => {
+    const token = route.params?.token;
+    if (!token) {
+      return;
+    }
+    const role = decodeRoleFromJwt(token) ?? "CLIENT";
+    setSession(token, role);
+  }, [route.params?.token, setSession]);
 
   return (
     <SafeAreaView className="flex-1 bg-brand" edges={["top"]}>

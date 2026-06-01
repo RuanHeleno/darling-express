@@ -10,6 +10,8 @@ export type MagicLinkResponse = {
   expires_in_seconds: number;
   expires_at: string;
   deep_link: string;
+  client_lat: number | null;
+  client_lng: number | null;
 };
 
 export async function requestMagicLink(

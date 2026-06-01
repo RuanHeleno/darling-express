@@ -13,3 +13,5 @@ class MagicLinkResponseSerializer(serializers.Serializer):
     expires_in_seconds = serializers.IntegerField()
     expires_at = serializers.CharField()
     deep_link = serializers.CharField()
+    client_lat = serializers.FloatField(allow_null=True)
+    client_lng = serializers.FloatField(allow_null=True)

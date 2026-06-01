@@ -1,5 +1,6 @@
 """Order views."""
 
+import logging
 from decimal import Decimal
 
 from rest_framework.views import APIView
@@ -21,6 +22,9 @@ from .serializers import (
     OrderSerializer,
 )
 from .services import lalamove_service, infinitepay_service, order_service
+
+
+logger = logging.getLogger(__name__)
 
 
 class ShippingQuoteView(APIView):
@@ -155,7 +159,7 @@ def _broadcast_order_update(order_id):
             {"type": "order.status.updated", "order_id": order_id},
         )
     except Exception:
-        pass  # Non-critical; WebSocket update is best-effort
+        logger.exception("Failed to broadcast order update for %s", order_id)
 
 
 class DispatchOrderView(APIView):
@@ -247,7 +251,13 @@ class OrderListView(APIView):
 
     def get(self, request):
         if request.user.is_staff:
-            orders = Order.objects.prefetch_related("items").all()
+            orders = Order.objects.select_related("client").prefetch_related(
+                "items__product"
+            )
         else:
-            orders = Order.objects.filter(client=request.user).prefetch_related("items")
+            orders = (
+                Order.objects.select_related("client")
+                .prefetch_related("items__product")
+                .filter(client=request.user)
+            )
         return Response(OrderSerializer(orders, many=True).data)

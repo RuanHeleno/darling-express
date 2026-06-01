@@ -53,4 +53,6 @@ def issue_magic_link(phone: str) -> dict:
         "expires_in_seconds": expires_in_seconds,
         "expires_at": expires_at.isoformat(),
         "deep_link": deep_link,
+        "client_lat": user.address_lat,
+        "client_lng": user.address_lng,
     }

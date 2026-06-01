@@ -13,13 +13,21 @@ const WS_BASE = (
 
 type OrderStatusCallback = (orderId: number) => void;
 
-export function useOrderWebSocket(orderId: number, onStatusUpdate: OrderStatusCallback) {
+export function useOrderWebSocket(
+  orderId: number | null,
+  onStatusUpdate: OrderStatusCallback,
+) {
   const { token } = useAuthStore();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shouldReconnect = useRef(true);
 
   const connect = useCallback(() => {
-    if (!token) return;
+    if (!token || !orderId) {
+      return;
+    }
+
+    wsRef.current?.close();
     const ws = new WebSocket(`${WS_BASE}/ws/orders/${orderId}/?token=${token}`);
     wsRef.current = ws;
 
@@ -33,6 +41,9 @@ export function useOrderWebSocket(orderId: number, onStatusUpdate: OrderStatusCa
     };
 
     ws.onclose = () => {
+      if (!shouldReconnect.current) {
+        return;
+      }
       // Reconnect after 3s unless unmounted
       reconnectTimeout.current = setTimeout(() => connect(), 3000);
     };
@@ -43,9 +54,15 @@ export function useOrderWebSocket(orderId: number, onStatusUpdate: OrderStatusCa
   }, [orderId, token, onStatusUpdate]);
 
   useEffect(() => {
+    shouldReconnect.current = true;
     connect();
+
     return () => {
+      shouldReconnect.current = false;
       if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
+      if (wsRef.current) {
+        wsRef.current.onclose = null;
+      }
       wsRef.current?.close();
     };
   }, [connect]);

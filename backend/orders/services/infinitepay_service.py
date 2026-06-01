@@ -3,6 +3,7 @@
 import hashlib
 import hmac
 import json
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -10,6 +11,9 @@ import requests
 
 from api.exceptions import APIError
 from api import errors as err
+
+
+logger = logging.getLogger(__name__)
 
 
 def _base_url() -> str:
@@ -134,7 +138,15 @@ def record_and_process_webhook(payload_bytes: bytes, signature: str, settings) -
                 )
                 event.order = order
         except Order.DoesNotExist:
-            pass
+            logger.warning("Webhook references unknown order %s", order_id)
+            event.status = WebhookEventStatus.FAILED
+            event.processed_at = datetime.now(tz=timezone.utc)
+            event.save(update_fields=["status", "processed_at"])
+            return {
+                "status": "failed",
+                "order_id": order_id,
+                "event_type": event_type,
+            }
 
     event.status = WebhookEventStatus.PROCESSED
     event.processed_at = datetime.now(tz=timezone.utc)

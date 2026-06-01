@@ -1,40 +1,99 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
 import { AppShell } from "@/components";
 import { useCartStore } from "@/stores/cartStore";
 import { payOrder } from "@/api/orders";
-import { useOrderWebSocket } from "@/features/checkout";
+import { useOrderWebSocket, useShippingQuote } from "@/features/checkout";
 import type { ClientStackParamList } from "@/navigation/ClientStack";
+import { useAuthStore } from "@/stores/authStore";
 
 export function CheckoutScreen() {
   const { items, cartTotal, clearCart } = useCartStore();
+  const clientLat = useAuthStore((state) => state.clientLat);
+  const clientLng = useAuthStore((state) => state.clientLng);
   const navigation = useNavigation<NavigationProp<ClientStackParamList>>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<number | null>(null);
   const [orderStatus, setOrderStatus] = useState<string>("PENDING");
+  const {
+    mutate: quoteShipping,
+    mutateAsync: quoteShippingAsync,
+    data: shippingQuoteData,
+    isPending: isQuoting,
+  } = useShippingQuote();
 
-  useOrderWebSocket(orderId ?? 0, (id) => {
+  useOrderWebSocket(orderId, (id) => {
     if (id) setOrderStatus("APPROVED_PREPARING");
   });
 
   const subtotal = cartTotal();
   const isFreeShipping = subtotal >= 150;
-  const total = subtotal; // shipping calculated server-side
+
+  const quoteItems = useMemo(
+    () =>
+      items.map((i) => ({
+        product_id: i.product_id,
+        quantity: i.quantity,
+        unit_price: i.unit_price,
+      })),
+    [items],
+  );
+
+  const canQuoteShipping =
+    !isFreeShipping &&
+    items.length > 0 &&
+    typeof clientLat === "number" &&
+    typeof clientLng === "number";
+
+  useEffect(() => {
+    if (!canQuoteShipping || isQuoting) {
+      return;
+    }
+
+    quoteShipping({
+      client_lat: clientLat,
+      client_lng: clientLng,
+      items: quoteItems,
+    });
+  }, [canQuoteShipping, clientLat, clientLng, quoteItems, isQuoting, quoteShipping]);
+
+  const shippingCost = isFreeShipping
+    ? 0
+    : Number(shippingQuoteData?.price ?? Number.NaN);
+  const total = subtotal + (Number.isFinite(shippingCost) ? shippingCost : 0);
 
   async function handlePay() {
     setLoading(true);
     setError(null);
     try {
+      if (!isFreeShipping && !canQuoteShipping) {
+        setError("Configure sua localizacao para calcular o frete antes de pagar.");
+        return;
+      }
+
+      let quotedPrice = shippingQuoteData?.price;
+      if (!isFreeShipping && !quotedPrice && canQuoteShipping) {
+        const quote = await quoteShippingAsync({
+          client_lat: clientLat,
+          client_lng: clientLng,
+          items: quoteItems,
+        });
+        quotedPrice = quote.price;
+      }
+
+      if (!isFreeShipping && !quotedPrice) {
+        setError("Nao foi possivel calcular o frete. Tente novamente.");
+        return;
+      }
+
       const result = await payOrder({
-        items: items.map((i) => ({
-          product_id: i.product_id,
-          quantity: i.quantity,
-          unit_price: i.unit_price,
-        })),
-        shipping_cost: isFreeShipping ? "0.00" : "0.00",
+        items: quoteItems,
+        client_lat: clientLat ?? undefined,
+        client_lng: clientLng ?? undefined,
+        shipping_cost: isFreeShipping ? "0.00" : String(quotedPrice),
       });
       setPixCode(result.pix_code);
       setOrderId(result.order_id);
@@ -42,12 +101,12 @@ export function CheckoutScreen() {
     } catch (e: unknown) {
       const message =
         typeof e === "object" &&
-        e !== null &&
-        "response" in e &&
-        typeof (e as { response?: { data?: { message?: unknown } } }).response?.data
-          ?.message === "string"
+          e !== null &&
+          "response" in e &&
+          typeof (e as { response?: { data?: { message?: unknown } } }).response?.data
+            ?.message === "string"
           ? (e as { response?: { data?: { message?: string } } }).response?.data
-              ?.message ?? "Erro ao processar pagamento."
+            ?.message ?? "Erro ao processar pagamento."
           : "Erro ao processar pagamento.";
       setError(message);
     } finally {
@@ -115,7 +174,15 @@ export function CheckoutScreen() {
         <View className="border-t border-gray-100 mt-2 pt-2">
           <View className="flex-row justify-between">
             <Text className="text-gray-600">Frete</Text>
-            <Text className="text-green-600 font-semibold">{isFreeShipping ? "Grátis" : "A calcular"}</Text>
+            <Text className="text-green-600 font-semibold">
+              {isFreeShipping
+                ? "Gratis"
+                : Number.isFinite(shippingCost)
+                  ? `R$ ${shippingCost.toFixed(2).replace(".", ",")}`
+                  : isQuoting
+                    ? "Calculando..."
+                    : "A calcular"}
+            </Text>
           </View>
           <View className="flex-row justify-between mt-2">
             <Text className="font-bold text-primaryDark">Total</Text>

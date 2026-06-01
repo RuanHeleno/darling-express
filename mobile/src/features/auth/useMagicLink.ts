@@ -8,7 +8,12 @@ export function useMagicLink() {
   return useMutation({
     mutationFn: requestMagicLink,
     onSuccess: (response) => {
-      setSession(response.token, response.role);
+      setSession(
+        response.token,
+        response.role,
+        response.client_lat,
+        response.client_lng,
+      );
     },
   });
 }

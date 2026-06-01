@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "@/stores/authStore";
 
 const runtimeEnv = globalThis as {
   process?: {
@@ -13,9 +14,7 @@ export const apiClient = axios.create({
 });
 
 // Inject JWT token from authStore on every request
-apiClient.interceptors.request.use(async (config) => {
-  // Import here to avoid circular dep; zustand getState() is sync
-  const { useAuthStore } = await import("../stores/authStore");
+apiClient.interceptors.request.use((config) => {
   const { token } = useAuthStore.getState();
   if (token) {
     config.headers = config.headers ?? {};
